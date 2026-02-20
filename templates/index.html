@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Player Fatigue Prediction</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        input, button { padding: 5px; margin: 5px; }
+        #result { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Player Fatigue Prediction</h1>
+    <form id="fatigue-form">
+        <label>Player ID:</label>
+        <input type="number" name="player_id" required>
+        <br>
+        <label>Match Minute (0–90):</label>
+        <input type="number" name="match_minute" min="0" max="90" required>
+        <br>
+        <button type="submit">Predict Fatigue</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('fatigue-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerText = "Calculating...";
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if(data.error){
+                    resultDiv.innerText = "⚠️ " + data.error;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p>Physical Fatigue: ${data.physical_fatigue}</p>
+                        <p>Mental Fatigue: ${data.mental_fatigue}</p>
+                        <p>Combined Fatigue: ${data.combined_fatigue}</p>
+                    `;
+                }
+            } catch (err) {
+                resultDiv.innerText = "⚠️ Error fetching data";
+            }
+        });
+    </script>
+</body>
+</html>
